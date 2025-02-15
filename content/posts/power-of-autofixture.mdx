@@ -1,0 +1,358 @@
+---
+title: Power of Autofixture
+description: AutoFixture is a powerful library that simplifies unit testing by automatically generating test data in .NET applications. This article explores how AutoFixture reduces boilerplate code, enhances test readability, and promotes maintainable test cases. Whether you're new to unit testing or an experienced developer looking to optimize your workflow, this guide will demonstrate how AutoFixture can elevate your testing strategy.
+date: 2025-02-01
+tags: ['backed', '.net', 'unit-test']
+published: true
+titleimage: autofixture.png
+---
+
+#### Intro
+
+On my first day at a new company, I was given an interesting task. It involved improving the tests by removing boilerplate code and replacing it with the AutoFixture library. Frankly, I was a bit confused at first, as I thought that transitioning to AutoFixture would be more time-consuming than simply using stub objects, as I had done before.
+
+So, I started investigating what this library was all about and what kind of power it could bring to the table. I decided to share my experience from this journey with you.
+
+Let’s start with the basics: What is AutoFixture and how does it work?
+
+```csharp numberLines
+ // a basic class where you have all magic etc
+var fixture = new Fixture();
+
+// let say I want to create some random int
+var i = fixture.Create<int>();
+
+// init ranmdom string
+var s = fixture.Create<string>();
+// start string from
+var stringStart = fixture.Create<string>("MyStringStartFromThis");
+```
+
+Nice! Now, let’s consider how to work with objects. Let’s take something simple, like a User and Post model in a one-to-many relationship.
+
+```csharp numberLines
+public class User
+{
+    public int Id { get; set; }
+    public required string FirstName { get; set; }
+    public required string LastName { get; set; }
+    public required string Email { get; set; }
+    public DateTime DateOfBirth { get; set; }
+    public IEnumerable<Post>? Posts { get; set; }
+}
+
+public class Post
+{
+    public int Id { get; set; }
+    public required string Title { get; set; }
+    public required string Content { get; set; }
+    public int AuthorId { get; set; }
+    public PostStatus Status { get; set; }
+}
+```
+
+What if I want to work with a complex object and build it in a specific way? For this, AutoFixture provides two methods: `Register` and `Inject`.
+
+Both Register and Inject methods help control how AutoFixture handles the creation of objects, but they serve different purposes:
+
+`Register<T>()` is used to define how AutoFixture should create or customize an instance of type T.
+`Inject<T>()` is used to inject a specific pre-existing instance of type T into AutoFixture’s object graph.
+
+```csharp numberLines
+var fixture = new Fixture();
+
+fixture.Register(
+    () =>
+      new User {
+        Id = 99,
+        Email = "test@test.com",
+        FirstName = "John",
+        LastName = "Doe"
+      });
+
+var user = fixture.Create<User>();
+```
+
+In this case, AutoFixture will always use the custom User constructor to create User instances.
+
+```csharp numberLines
+var user = new User {
+        Id = 99,
+        Email = "test@test.com",
+        FirstName = "John",
+        LastName = "Doe"
+      };
+
+fixture.Inject(user);
+
+var anotherUser = fixture.Create<User>();
+```
+
+In this case, anotherUser will be injected with the same instance of User that you provided ("Injected User").
+
+Using the `Inject<T>()` when you want AutoFixture to reuse an existing instance of a type (for example, when you need a shared state between objects or when testing with a specific object instead of generating a new one).
+
+#### Working with Primitives:
+
+```csharp numberLines
+// for the privitive it is working to Register a singletone
+fixture.Register(() => "registered string");
+
+var anyStringRegistered = fixture.Create<string>();
+
+Assert.Equal("registered string", anyStringRegistered); // true
+```
+
+#### Customizations
+
+One of the coolest features of AutoFixture is **_Customizations_**. In short, they allow you to describe the rules for how your test objects will be created.
+
+```csharp numberLines
+var fixture = new Fixture();
+
+// create some customization for User
+fixture.Customize<User>(composer =>
+    composer
+        .Without(x => x.Id)
+        .With(x => x.FirstName, "John")
+        .With(x => x.LastName, "Jo"));
+```
+
+From this point onward, all User instances will follow the current customization.
+
+```csharp numberLines
+var fixture = new Fixture();
+
+// this is user based on current customization
+var user = fixture.Create<User>();
+
+Assert.Equal("John", user.FirstName);
+Assert.Equal("Jo", user.LastName);
+Assert.Equal(default, user.Id);
+```
+
+#### Customize `With()` and `Do()` vs `Wihtout()` and `Do()`,
+
+The `With()` method takes priority over `Do()`. If you want to apply logic using `Do()`, use `Without()` for the same property.
+
+```csharp numberLines
+[Fact]
+public void AutoFixtureComplex()
+{
+    var fixture = new Fixture();
+
+    fixture.Customize<User>(composer =>
+        composer
+            // .Without(x => x.Id)
+            .With(x => x.Id, 101) // `With()` takes precedence over `.Do()`
+            .With(x => x.FirstName, "Bob")
+            .With(x => x.LastName, "Bo")
+            .With(x => x.Email, fixture.Create<string>())
+            .Do(x =>
+            {
+                x.Id = 100;
+                x.Email = "bob@bob.com";
+            }));
+
+    var user2 = fixture.Create<User>();
+
+    Assert.Equal("Bob", user2.FirstName);
+    Assert.Equal(101, user2.Id);// The ID is 101 due to `With()`
+    }
+```
+
+#### Customize FromFactory
+
+It is working similar to `Customize` composer where it going to specify the object that is going to create and the `.OmitAutoProperties()` to supress autoset for propertis, in belong example without omit the autofixture populated the list of posts automatically by default 3 items. I use it to supress.
+
+```csharp numberLines
+[Fact]
+public void AutoFixture_FromFactory()
+{
+  var fixture = new Fixture();
+
+  fixture.Customize<User>(c =>
+      c.FromFactory(() => new User
+          {
+              Id = 33,
+              FirstName = "Alex",
+              LastName = "A",
+              DateOfBirth = new DateTime(1985, 4, 5),
+              Email = "bob@bob.com",
+              Posts = new List<Post>()
+          })
+          .OmitAutoProperties()
+  );
+
+  var user = fixture.Create<User>();
+
+
+  Assert.Equal("Alex", user.FirstName);
+  Assert.Equal("A", user.LastName);
+  Assert.Equal(33, user.Id);
+}
+```
+
+#### Customize FromSeed
+
+If you have a list of objects and need to ensure properties are ordered, or if you want to create multiple objects at once, you can use `.CreateMany<T>()` with a specified count.
+
+```csharp numberLines
+[Fact]
+public void AutoFixture_FromSeed_CreateMany()
+{
+  var fixture = new Fixture();
+
+  var a = 1;
+  fixture.Customize<User>(c =>
+      c.FromSeed(seed => new User
+          {
+              Id = a++,
+              Email = "bob@bob.com",
+              FirstName = $"FirstName{a}",
+              LastName = $"LastName{a}"
+          })
+          .Without(x => x.Id));
+
+  var users = fixture
+      .CreateMany<User>(10)
+      .ToList();
+
+  Assert.Equal(10, users.Count);
+  Assert.Equal(10, users.Max(x => x.Id));
+}
+
+```
+
+In this test, we create 10 User objects with IDs from 1 to 10..
+
+### Working with Relationships
+
+Now you may be wondering how to set up objects with relationships—such as ensuring the User ID matches the AuthorId in the Post model.
+Customizations allow you to reuse the same logic for related objects.
+
+```csharp numberLines
+class UserCustomization : ICustomization
+    {
+        public void Customize(IFixture fixture)
+        {
+            var userId = 1;
+
+            var post = fixture.Build<Post>()
+                .With(x => x.AuthorId, userId)
+                .Create();
+
+            fixture.Customize<User>(composer =>
+                composer
+                    .With(x => x.Id, userId)
+                    .With(x => x.FirstName, "Customization")
+                    .With(x => x.LastName, "Customization")
+                    .With(x => x.Posts, new List<Post> { post }));
+        }
+    }
+```
+
+Now you can register the customization:
+
+```csharp numberLines
+[Fact]
+public void AutoFixture_Customization_And_RelationSimpleWay()
+{
+    var fixture = new Fixture();
+    fixture.Customize(new UserCustomization());
+
+    var user = fixture.Create<User>();
+
+    Assert.Equal(1, user.Id);
+    Assert.Equal(user.Posts!.First().AuthorId, user.Id);
+}
+```
+
+Perfect, now we have an a customization with correct setup how we can make it resusable for tests?
+
+#### Composite Customizations and CustomizedAutoDataAttribute
+
+You can create multiple customizations and combine them into a composite with some simple logic.
+
+1. Define individual customizations:
+
+```csharp numberLines
+public class UserCustomization : ICustomization
+{
+    public void Customize(IFixture fixture)
+    {
+        fixture
+            .Customize<User>(c => c.With(x => x.FirstName, "Customized"));
+    }
+}
+
+public class PostCustomization : ICustomization
+{
+    public void Customize(IFixture fixture)
+    {
+        fixture.Customize<Post>(c => c);
+    }
+}
+```
+
+2. Create a composite customization:
+
+```csharp numberLines
+public class MyCompositeEntityCustomization : CompositeCustomization
+{
+    public MyCompositeEntityCustomization() :
+        base(
+            new UserCustomization(),
+            new PostCustomization()
+        ){}
+}
+```
+
+3. Use the composite customization with the `AutoDataAttribute`:
+
+```csharp numberLines
+public abstract class CustomizedAutoDataAttribute(params ICustomization[] customizations)
+    : AutoDataAttribute(
+        () =>
+        {
+            var fixture = new Fixture();
+
+            if (customizations.Length != 0)
+            {
+                fixture.Customize(new CompositeCustomization(customizations));
+            }
+
+            return fixture;
+        });
+```
+
+4. Finally, use the custom data attribute in your tests:
+
+```csharp numberLines
+public class ModelDataAttribute()
+    : CustomizedAutoDataAttribute(new MyCompositeEntityCustomization());
+
+```
+
+4. Eventially the test will decorated an a model data attribute as a prameter into method you pass an a User that is going to be created in step 0 our example.
+
+```csharp numberLines
+[Theory]
+[ModelData]
+public void AutoFixture_Customization_WithAttribute(User user)
+{
+    Assert.Equal("Customized", user.FirstName);
+}
+```
+
+Thouse steps you might consider to example your tests with Autfixture.
+
+#### To Summarize
+
+> - AutoFixture does require some initial knowledge and setup, but it’s incredibly powerful once you get the hang of it.
+> - It may seem like it takes more time than using stub objects or manually building objects, but once everything is in place, writing tests becomes faster.
+> - With AutoFixture, tests look cleaner and more maintainable!
+
+Source of code: https://github.com/RybalkoValeriy/helloautofixture
+
+Happy coding! :)

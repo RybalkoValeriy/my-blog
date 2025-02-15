@@ -15,7 +15,7 @@ const posts = defineCollection({
     .object({
       slug: s.path(),
       title: s.string().max(99),
-      description: s.string().max(999).optional(),
+      description: s.string().max(9999).optional(),
       date: s.isodate(),
       published: s.boolean().default(true),
       tags: s.array(s.string()).optional(),
@@ -24,6 +24,10 @@ const posts = defineCollection({
     })
     .transform(computedFields),
 })
+
+const options = {
+  theme: 'github-light',
+}
 
 export default defineConfig({
   root: 'content',
@@ -38,7 +42,7 @@ export default defineConfig({
   mdx: {
     rehypePlugins: [
       rehypeSlug,
-      [rehypePrettyCode, { theme: 'github-dark' }],
+      [rehypePrettyCode, options],
       [
         rehypeAutolinkHeadings,
         {

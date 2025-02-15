@@ -11,14 +11,14 @@ export function MainNav() {
   return (
     <nav className="flex items-center space-x-4 lg:space-x-6">
       <Link href="/" className="mr-6 flex items-center space-x-2">
-        <Icons.logo className="h-8 w-8" />
+        <Icons.logo className="h-4 w-4" />
         <span className="font-bold">{siteConfig.name}</span>
       </Link>
       <Link
-        href="/posts"
+        href="/"
         className={cn(
           'text-sm font-medium transition-colors hover:text-primary hidden sm:inline-block',
-          pathname === '/posts' ? 'text-foreground' : 'text-foreground/60'
+          pathname === '/' ? 'text-foreground' : 'text-foreground/60'
         )}
       >
         Posts

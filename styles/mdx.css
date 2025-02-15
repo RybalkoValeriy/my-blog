@@ -4,6 +4,9 @@
 
 [data-rehype-pretty-code-figure] code {
   @apply text-sm !leading-loose md:text-base border-0 p-0;
+  font-family: 'JetBrains Mono';
+  font-size: small;
+  background-color: rgb(246, 248, 250);
 }
 
 [data-rehype-pretty-code-figure] code[data-line-numbers] {

@@ -1,11 +1,15 @@
+import { Linkedin } from 'lucide-react'
+
 export const siteConfig = {
-  name: "Valerii's Blog",
-  url: 'https://example.com',
+  name: 'Valerii Rybalko’s Blog',
+  url: 'https://example.com', // todo: change it?
   description: 'Nextjs 14 blog using velite, tailwind and shadcn',
   author: 'Valerii Rybalko',
   links: {
-    github: 'https://github.com',
-    personalSite: 'https://valrii.com',
+    linkedin: 'https://www.linkedin.com/in/valerii-rybalko/',
+    github: 'https://github.com/RybalkoValeriy',
+    personalSite: 'https://valrii.com', // todo: change it?
+    email: 'typeonegative86@gmail.com',
   },
 }
 

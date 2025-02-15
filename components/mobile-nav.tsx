@@ -26,12 +26,12 @@ export function MobileNav() {
           href="/"
           className="flex items-center"
         >
-          <Icons.logo className="mr-2 h-4 w-4" />
+          <Icons.logo className="mr-2 h-6 w-6" />
           <span className="font-bold">{siteConfig.name}</span>
         </MobileLink>
         <div className="flex flex-col gap-3 mt-3">
-          <MobileLink onOpenChange={setOpen} href="/posts">
-            Blog
+          <MobileLink onOpenChange={setOpen} href="/">
+            Posts
           </MobileLink>
           <MobileLink onOpenChange={setOpen} href="/about">
             About

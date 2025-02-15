@@ -5,7 +5,7 @@ import { buttonVariants } from './ui/button'
 import { Icons } from './icons'
 import { MainNav } from './main-nav'
 import { MobileNav } from './mobile-nav'
-import { ModeToggle } from './mode-toggle'
+import { ThemeSwitcher } from './mode-switcher'
 
 export function SiteHeader() {
   return (
@@ -29,7 +29,7 @@ export function SiteHeader() {
                 <span className="sr-only">GitHub</span>
               </div>
             </Link>
-            <ModeToggle />
+            <ThemeSwitcher />
             <MobileNav />
           </nav>
         </div>

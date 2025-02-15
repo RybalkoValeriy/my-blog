@@ -74,3 +74,11 @@
     @apply bg-background text-foreground;
   }
 }
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('../assets/fonts/JetBrainsMono-Medium.ttf') format('woff2'),
+    url('../assets/fonts/JetBrainsMono-Medium.ttf') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}

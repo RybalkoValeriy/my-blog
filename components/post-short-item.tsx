@@ -8,8 +8,8 @@ interface PostShortProps {
 
 export function PostShortItem({ slug, title }: PostShortProps) {
   return (
-    <div className="grid grid-rows-2 grid-colums-4 hover:bg-secondary/80 p-1 rounded-sm  underline underline-offset-1">
-      <Link href={'/' + slug} className="row-span-2 ">
+    <div className="grid grid-rows-2 grid-colums-4 hover:bg-secondary/80 p-1 rounded-sm underline underline-offset-1">
+      <Link href={'/' + slug} className="row-span-2 text-sm">
         {title}
       </Link>
     </div>

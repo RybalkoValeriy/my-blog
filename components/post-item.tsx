@@ -1,10 +1,17 @@
-import { Calendar } from 'lucide-react'
+import { Calendar, Clock } from 'lucide-react'
 import { buttonVariants } from './ui/button'
 import { cn, formatDate } from '@/lib/utils'
-import { Tag } from './tag'
 import Link from 'next/link'
 import React from 'react'
-import { Card, CardHeader, CardContent, CardTitle, CardFooter } from './ui/card'
+import Image from 'next/image'
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardTitle,
+  CardFooter,
+  CardDescription,
+} from './ui/card'
 
 interface PostItemProps {
   slug: string
@@ -24,34 +31,43 @@ export function PostItem({
   reading,
 }: PostItemProps) {
   return (
-    <Card className=" rounded-sm flex flex-col p-4 mb-4 gap-2 border-border border-b py-3">
-      <CardTitle>
-        <Link href={'/' + slug}>{title}</Link>
-      </CardTitle>
-
-      {titleimage ? (
-        <CardHeader>
-          <img
-            src={'/' + titleimage}
-            className="h-48 w-96 object-cover center rounded-sm"
-          ></img>
-        </CardHeader>
-      ) : null}
-
+    <Card className="rounded-sm flex flex-col p-4 mb-4 gap-2 border-border border-b py-3 bg-r">
+      <CardHeader>
+        <CardTitle>
+          <Link href={'/' + slug}>{title}</Link>
+        </CardTitle>
+      </CardHeader>
       <CardContent>
         <div className="flex justify-between items-center">
-          <dl>
-            <dt className="sr-only">Published On</dt>
-            <dd className="text-sm sm:text-base font-medium flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
-              <time dateTime={date}>{formatDate(date)}</time>
-            </dd>
-          </dl>
-          {reading}
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4" />
+            <time dateTime={date} className="text-xs sm:text-sm font-medium">
+              {formatDate(date)}
+            </time>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs sm:text-sm">
+            <Clock className="h-6 w-4" />
+            {reading}
+          </div>
         </div>
       </CardContent>
-      <CardContent>{description}</CardContent>
-      <CardFooter className="flex justify-between">
+
+      {titleimage && (
+        <CardHeader className="border border-gray-300 rounded-sm">
+          <Image
+            src={'/' + titleimage}
+            alt={title}
+            className="w-full h-full object-cover rounded-sm"
+            layout="responsive"
+            width={700}
+            height={475}
+          />
+        </CardHeader>
+      )}
+
+      <CardDescription className="m-1">{description}</CardDescription>
+      <CardFooter className="flex justify-between mt-4">
         <Link
           href={'/' + slug}
           className={cn(buttonVariants({ variant: 'default' }), 'py-0')}
