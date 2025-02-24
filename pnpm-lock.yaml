@@ -44,9 +44,6 @@ importers:
       react:
         specifier: ^18
         version: 18.2.0
-      react-d3-graph:
-        specifier: ^2.6.0
-        version: 2.6.0(d3@5.16.0)(react@18.2.0)
       react-dom:
         specifier: ^18
         version: 18.2.0(react@18.2.0)
@@ -2300,13 +2297,6 @@ packages:
 
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
-
-  react-d3-graph@2.6.0:
-    resolution: {integrity: sha512-U72didZuPuYEqAi1n2bJvnph+9MviIw2x9I0eoxb1IKk3cyEwsJV96n3RL72z/7HDsa1FOvDKuOJE7ujSNZB/Q==}
-    engines: {node: '>=8.9.0'}
-    peerDependencies:
-      d3: ^5.5.0
-      react: ^16.4.1
 
   react-dom@18.2.0:
     resolution: {integrity: sha512-6IMTriUmvsjHUjNtEDudZfuDQUoWXVxKHhlEGSk81n4YFS+r/Kl99wXiwlVXtPBtJenozv2P+hxDsw9eA7Xo6g==}
@@ -5392,11 +5382,6 @@ snapshots:
   punycode@2.3.1: {}
 
   queue-microtask@1.2.3: {}
-
-  react-d3-graph@2.6.0(d3@5.16.0)(react@18.2.0):
-    dependencies:
-      d3: 5.16.0
-      react: 18.2.0
 
   react-dom@18.2.0(react@18.2.0):
     dependencies:
