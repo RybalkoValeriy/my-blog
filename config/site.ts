@@ -1,5 +1,3 @@
-import { Linkedin } from 'lucide-react'
-
 export const siteConfig = {
   name: 'Valerii Rybalko’s Blog',
   url: 'https://val86.site',
