@@ -10,6 +10,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Check and Install Netcat
+        run: |
+          if ! command -v nc &> /dev/null
+          then
+            echo "Netcat (nc) is not installed. Installing now..."
+            sudo apt update && sudo apt install -y netcat-openbsd
+          else
+            echo "Netcat (nc) is already installed."
+          fi
+
+      - name: Check if Port 22 is Open
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+        run: |
+          echo "Checking SSH connection to: $SERVER_HOST"
+          nc -zv $SERVER_HOST 22
+          if [ $? -ne 0 ]; then
+            echo "❌ ERROR: Port 22 is closed or unreachable."
+            exit 1  # Fail the workflow and stop further execution
+          else
+            echo "Port 22 is open and reachable."
+          fi
+
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -27,24 +50,21 @@ jobs:
       - name: Build the project
         run: pnpm run build
 
+      - name: Install sshpass
+        run: sudo apt-get install -y sshpass
+
       - name: Deploy to server
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
           SERVER_PATH: ${{ secrets.SERVER_PATH }}
         run: |
-          echo "Saving SSH private key..."
-          echo "$SSH_PRIVATE_KEY" > private_key
-          chmod 600 private_key
-          echo "SSH private key saved and permissions set."
-
           echo "Starting rsync to copy files to the server..."
-          echo 'The server path: $SERVER_PATH'
-          rsync -avz -e "ssh -i private_key" --exclude='.git' ./ $SERVER_USER@$SERVER_HOST:$SERVER_PATH
+          sshpass -p "$SERVER_PASSWORD" rsync -avz -e "ssh -o StrictHostKeyChecking=no" --exclude='.git' ./ $SERVER_USER@$SERVER_HOST:$SERVER_PATH
           if [ $? -ne 0 ]; then
             echo "rsync failed. Checking SSH connection..."
-            ssh -i private_key -v $SERVER_USER@$SERVER_HOST "echo 'SSH connection successful'"
+            sshpass -p "$SERVER_PASSWORD" ssh -o StrictHostKeyChecking=no -v $SERVER_USER@$SERVER_HOST "echo 'SSH connection successful'"
             if [ $? -ne 0 ]; then
               echo "SSH connection failed. Please check server IP, port, and firewall settings."
               exit 1
@@ -53,7 +73,7 @@ jobs:
           echo "Files copied to the server."
 
           echo "Connecting to the server to build and run Docker container..."
-          ssh -i private_key $SERVER_USER@$SERVER_HOST "
+          sshpass -p "$SERVER_PASSWORD" ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST "
             echo 'Navigating to the server path: $SERVER_PATH'
             cd $SERVER_PATH &&
             echo 'Building Docker image...'
