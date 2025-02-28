@@ -40,6 +40,7 @@ jobs:
           echo "SSH private key saved and permissions set."
 
           echo "Starting rsync to copy files to the server..."
+          echo 'The server path: $SERVER_PATH'
           rsync -avz -e "ssh -i private_key" --exclude='.git' ./ $SERVER_USER@$SERVER_HOST:$SERVER_PATH
           if [ $? -ne 0 ]; then
             echo "rsync failed. Checking SSH connection..."
