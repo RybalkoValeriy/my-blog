@@ -34,12 +34,26 @@ jobs:
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
           SERVER_PATH: ${{ secrets.SERVER_PATH }}
         run: |
+          echo "Saving SSH private key..."
           echo "$SSH_PRIVATE_KEY" > private_key
           chmod 600 private_key
+          echo "SSH private key saved and permissions set."
+
+          echo "Starting rsync to copy files to the server..."
           rsync -avz -e "ssh -i private_key" --exclude='.git' ./ $SERVER_USER@$SERVER_HOST:$SERVER_PATH
+          echo "Files copied to the server."
+
+          echo "Connecting to the server to build and run Docker container..."
           ssh -i private_key $SERVER_USER@$SERVER_HOST "
+            echo 'Navigating to the server path: $SERVER_PATH'
             cd $SERVER_PATH &&
+            echo 'Building Docker image...'
             sudo docker build -t blog-image . &&
+            echo 'Stopping existing Docker container...'
             sudo docker stop blog || true &&
+            echo 'Removing existing Docker container...'
             sudo docker rm blog || true &&
+            echo 'Running new Docker container...'
             sudo docker run -d --tmpfs /tmp --name blog --network tunnel -p 3000:3000 blog-image
+          "
+          echo "Deployment completed."
