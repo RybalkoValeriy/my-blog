@@ -37,4 +37,9 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > private_key
           chmod 600 private_key
           rsync -avz -e "ssh -i private_key" --exclude='.git' ./ $SERVER_USER@$SERVER_HOST:$SERVER_PATH
-          ssh -i private_key $SERVER_USER@$SERVER_HOST "cd $SERVER_PATH && pnpm install && pm2 restart all"
+          ssh -i private_key $SERVER_USER@$SERVER_HOST "
+            cd $SERVER_PATH &&
+            sudo docker build -t blog-image . &&
+            sudo docker stop blog || true &&
+            sudo docker rm blog || true &&
+            sudo docker run -d --tmpfs /tmp --name blog --network tunnel -p 3000:3000 blog-image
