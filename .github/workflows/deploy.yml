@@ -25,7 +25,7 @@ jobs:
           MY_SH: ${{ secrets.SERVER_HOST }}
         run: |
           echo "Checking SSH connection to: $MY_SH"
-          nc -zv $MY_SH 22
+          nc -zv 192.168.178.60 22
           if [ $? -ne 0 ]; then
             echo "ERROR: Port 22 is closed or unreachable."
             exit 1  # Fail the workflow and stop further execution
