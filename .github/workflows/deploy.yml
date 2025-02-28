@@ -41,6 +41,14 @@ jobs:
 
           echo "Starting rsync to copy files to the server..."
           rsync -avz -e "ssh -i private_key" --exclude='.git' ./ $SERVER_USER@$SERVER_HOST:$SERVER_PATH
+          if [ $? -ne 0 ]; then
+            echo "rsync failed. Checking SSH connection..."
+            ssh -i private_key -v $SERVER_USER@$SERVER_HOST "echo 'SSH connection successful'"
+            if [ $? -ne 0 ]; then
+              echo "SSH connection failed. Please check server IP, port, and firewall settings."
+              exit 1
+            fi
+          fi
           echo "Files copied to the server."
 
           echo "Connecting to the server to build and run Docker container..."
