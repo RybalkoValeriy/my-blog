@@ -7,7 +7,9 @@ import { Metadata } from 'next'
 import { siteConfig } from '@/config/site'
 import { Tag } from '@/components/tag'
 import { calculateReadingTime, formatDate } from '@/lib/utils'
-import { Calendar, Image, Clock } from 'lucide-react'
+import { Calendar, Clock } from 'lucide-react'
+import Image from 'next/image'
+import { Comments } from '@/components/ui/comments'
 interface PostPageProps {
   params: {
     slug: string[]
@@ -92,8 +94,10 @@ export default async function PostPage({ params }: PostPageProps) {
         ))}
       </div>
       {post.titleimage && (
-        <img
+        <Image
           src={'/' + post.titleimage}
+          width={1200}
+          height={630}
           className="w-full h-full object-cover rounded-sm"
           alt={post.title}
         />
@@ -105,6 +109,7 @@ export default async function PostPage({ params }: PostPageProps) {
       ) : null}
       <hr className="my-4" />
       <MDXContent code={post.body} />
+      <Comments />
     </article>
   )
 }
