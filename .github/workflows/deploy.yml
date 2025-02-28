@@ -22,12 +22,12 @@ jobs:
 
       - name: Check if Port 22 is Open
         env:
-          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          MY_SH: ${{ secrets.SERVER_HOST }}
         run: |
-          echo "Checking SSH connection to: $SERVER_HOST"
-          nc -zv $SERVER_HOST 22
+          echo "Checking SSH connection to: $MY_SH"
+          nc -zv $MY_SH 22
           if [ $? -ne 0 ]; then
-            echo "❌ ERROR: Port 22 is closed or unreachable."
+            echo "ERROR: Port 22 is closed or unreachable."
             exit 1  # Fail the workflow and stop further execution
           else
             echo "Port 22 is open and reachable."
